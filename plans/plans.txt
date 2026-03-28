@@ -1,0 +1,35 @@
+here i want to make a resume ready full stack project i.e complete backend , backend , testing , ci-cd devops , deployment in aws
+
+webapp concept is to make a ticket booking web app something similar to bookmyshow , i.e for show/cinema booking web app 
+1->user will come to landing page register himself by phone number , basic details like name , age , gender , this data will be saved for further login of user 
+2->user logged in select a date from calender , a list of shows(at differet time slot) pops up (for now only 1 cinema hall will be there but further i plan to extend) user selct one from slot goes inside choose a seat from 50 or 60 seats , price will be vary depending on seat arrangement and other facility , like commoner , premium, balcony , ac etc.. , user select a seat , pays(payment simulation) , seat confirmation invoice comes , booked seat will be red marked and freed ones with green in ui , when the slot of show ends all seats automatically become green or something like that(give brain storming) for next book
+
+
+tech stack im aiming for
+------------------------
+-frontend:react+redux
+-backend:asp.net
+-backend:mariadb
+-testing:selenium+playwright
+-cicd:in github acttion (frontend (test+build) and backend(test and build))->lighthouse check->snyk.io check ->docker build check -> send notification with discord webhook
+-deployment: in aws(free tier) with the help of terraform (if possible)
+
+
+other feature i want to include here is:
+-sleek and modern ui 
+-Api designs should be like real comapanies
+-concurrency handelling during seat booking (seat locking)
+-payment simulatin
+-proper use of exception handling(global level) ,try catch etc
+-feture falging/feature toggle concept
+-role based auth (access) with jwt (simple user)(admin who will resister the shows+price+time slot etc) , max 4 show(morning-noon-evng-night)
+-idempotency(if user clicks book twice shouldnt duplicate booking)
+-api versioning
+-logging(logging attempt+eeror+failure)
+-rate limmiting(for spam booking)
+
+im not aiming for max user or load etc in deployment but for implementing and experimenting this concept i.e aws , .net deployment + some backend concepts
+
+if there any other feature you think should be included here please suggest me
+
+i never did the .net project so if anything i have to manually say it , and i dont know much about aws so i will be needing your help for that
