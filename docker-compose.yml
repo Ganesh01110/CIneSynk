@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: cinesynk-db
+    restart: always
+    environment:
+      MARIADB_DATABASE: bookingapplication
+      MARIADB_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend/TicketBooking.Api
+      dockerfile: Dockerfile
+    container_name: cinesynk-api
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;user=root;password=rootpassword;database=bookingapplication
+      - JwtSettings__Key=this_is_a_very_secret_and_long_key_for_development_purposes
+    ports:
+      - "5263:8080" # Maps local port 5263 to container ASP.NET port
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cinesynk-ui
+    depends_on:
+      - backend
+    ports:
+      - "3000:80" # Maps local port 3000 to Nginx container port
+
+volumes:
+  db_data:
