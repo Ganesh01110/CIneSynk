@@ -101,13 +101,73 @@ jobs:
       run: docker-compose build
 
   # ------------------------------------------------------------------
+  # 5. DOCKER BUILD & DEPLOY TO AWS
+  # ------------------------------------------------------------------
+  deploy:
+    name: Build & Deploy to ECS
+    needs: [snyk-scan, lighthouse-audit, docker-verify]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push API image to Amazon ECR
+      id: build-image-api
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: cinesynk-api
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backend/TicketBooking.Api
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Build, tag, and push Frontend image to Amazon ECR
+      id: build-image-frontend
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: cinesynk-frontend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./frontend
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Deploy Amazon ECS (API)
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: infrastructure/ecs/api-task-def.json
+        service: cinesynk-api-service
+        cluster: cinesynk-cluster
+        wait-for-service-stability: true
+
+    - name: Deploy Amazon ECS (Frontend)
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: infrastructure/ecs/frontend-task-def.json
+        service: cinesynk-frontend-service
+        cluster: cinesynk-cluster
+        wait-for-service-stability: true
+
+  # ------------------------------------------------------------------
   # 5. NOTIFICATION
   # ------------------------------------------------------------------
   notify:
     name: Status Notification
     runs-on: ubuntu-latest
     if: always()
-    needs: [docker-verify]
+    needs: [deploy]
     steps:
       - name: Send Discord Notification
         uses: tsickert/discord-webhook@v5.3.0
