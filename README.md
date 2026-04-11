@@ -14,8 +14,10 @@
 - **High-Concurrency Booking:** Implements **Optimistic Concurrency Control** (EF Core RowVersion) to prevent double-booking.
 - **Stateless Security:** Secure JWT-based authentication with BCrypt password hashing.
 - **Enterprise Resilience:** Background workers for automatic cleanup of expired reservations (Idempotency assured).
-- **Premium UX:** High-performance React UI with glassmorphic aesthetics and real-time seat synchronization.
-- **Cloud Native:** Fully automated deployment to **AWS ECS Fargate** using Terraform (IaC).
+- **Premium UX:** High-performance React UI with glassmorphic aesthetics.
+- **Cloud Native:** Fully automated deployment to **AWS ECS Fargate**.
+- **Full Observability:** Integrated **Prometheus** & **Grafana** stack for real-time monitoring.
+- **Interactive API:** Full **Swagger UI** for endpoint discovery and testing.
 
 ---
 
@@ -51,6 +53,8 @@ Explore the detailed technical documentation for each layer of CineSynk:
 | **Quality Gates** | [5-Tiered Testing Strategy](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/testDocs.md) |
 | **DevOps** | [CI/CD & Pipeline Workflow](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/devopsDocs.md) |
 | **Cloud Infra** | [Terraform & AWS Deployment](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/infraDocs.md) |
+| **Workflows** | [Step-by-Step Command Guide](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/workflowDocs.md) |
+| **Architecture** | [Visual Flow & Data Diagrams](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/architectureDocs.md) |
 
 ---
 
@@ -62,11 +66,18 @@ Explore the detailed technical documentation for each layer of CineSynk:
 - Node.js 20+
 
 ### **Run with Docker Compose**
-Spin up the entire ecosystem (API, Frontend, and MariaDB) with a single command:
+Spin up the entire ecosystem (API, Frontend, MariaDB, and Monitoring) with one command:
 ```bash
 docker-compose up -d --build
 ```
-Access the application at `http://localhost:5173`.
+
+### **Entry Points**
+| Service | Local URL |
+| :--- | :--- |
+| **Frontend UI** | `http://localhost:5173` |
+| **API Swagger UI** | `http://localhost:5000/swagger` |
+| **Grafana Dashboard** | `http://localhost:3001` (user: `admin`, pass: `admin`) |
+| **Prometheus** | `http://localhost:9090` |
 
 ---
 

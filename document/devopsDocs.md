@@ -21,9 +21,9 @@ The .NET backend uses two stages to maintain security and reduce image size:
 
 The entire PulsQueue ecosystem can be launched with **`docker-compose up -d`**.
 
-- **`db` Service:** MariaDB 10.11 with persistent volume mapping (`db_data`).
-- **`backend` Service:** Connects to the database using environment-variable-based connection strings.
-- **`frontend` Service:** Serves the UI on port 3000 and proxies all `/api/*` traffic to the backend container.
+- **`backend` Service:** Connects to the database using environment-variable-based connection strings. Exposed on port 5000.
+- **`frontend` Service:** Serves the UI on port 5173 and proxies traffic to the backend.
+- **`monitoring` Stack:** Integrated Prometheus (9090) and Grafana (3001) for real-time observability.
 
 ---
 
@@ -59,8 +59,9 @@ Sends a rich embed notification to a Discord Webhook showing:
 
 ---
 
-## 🛠 Future Roadmap: Phase 5 (Cloud)
+## 🏗️ Phase 5: Cloud Deployment (Completed)
 
-The next step for DevSecOps is **Cloud Deployment**.
-- **Terraform:** To provision Azure Web Apps or AWS ECS clusters.
-- **Secrets Management:** Integrating Azure Key Vault or AWS Secrets Manager for production.
+The project is fully ready for **Production Cloud Deployment**.
+- **Terraform:** Provisioned AWS ECS Fargate, RDS, and ALB.
+- **Secrets Management:** Integrating AWS Secrets Manager for production security.
+- **Blue/Green Deployment:** Supported via the ECS rolling update pipeline in CI/CD.

@@ -63,7 +63,11 @@ This document provide a deep dive into the specialized testing ecosystem of Cine
 
 ---
 
-## ⚙️ 7. Graceful Shutdown Testing
-**What:** Testing how the app behaves when it is told to stop (SIGTERM).
-**Why:** If the system shuts down in the middle of a booking, we need to ensure the database doesn't get corrupted and resources are released properly.
-**How:** Mocking `IHostApplicationLifetime` to monitor the cancellation token flow in backend tests.
+## 📊 8. Metrics & Observability
+**What:** Collecting real-time performance and business data.
+**Why:** To catch silent failures (like 100% CPU usage) and monitor business health (like how many bookings are being confirmed).
+**How:**
+- **Tool:** `prometheus-net` (Exporting to `/metrics`).
+- **Storage:** `Prometheus` (Scraping every 5 seconds).
+- **Visualization:** `Grafana` (Professional dashboards).
+- **Location:** `monitoring/` and `docker-compose.yml`.

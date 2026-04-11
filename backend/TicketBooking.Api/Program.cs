@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using TicketBooking.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Configure MariaDB DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -73,11 +76,32 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// AUTOMATIC MIGRATIONS: Ensures the DB schema is created on startup (Critical for AWS RDS)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<TicketBookingDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("Database migration applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while migrating the database: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+// Prometheus Instrumentation
+app.UseHttpMetrics();
 
 // Global Exception Handler
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -94,6 +118,9 @@ app.UseAuthorization();
 
 // Health Check Endpoint
 app.MapHealthChecks("/health");
+
+// Prometheus metrics endpoint
+app.MapMetrics();
 
 app.MapControllers(); // Map Controller routes
 
