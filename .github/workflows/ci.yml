@@ -27,6 +27,8 @@ jobs:
       run: dotnet restore backend/TicketBooking.Api/TicketBooking.Api.csproj
     - name: Build
       run: dotnet build backend/TicketBooking.Api/TicketBooking.Api.csproj --no-restore
+    - name: Run Tests (Unit, Arch, Integration)
+      run: dotnet test backend/TicketBooking.Tests/TicketBooking.Tests.csproj --no-restore --verbosity normal
 
   frontend-check:
     name: Frontend (Lint & Build)
@@ -43,6 +45,8 @@ jobs:
       run: cd frontend && npm ci
     - name: Build
       run: cd frontend && npm run build
+    - name: Install Playwright
+      run: cd frontend && npx playwright install --with-deps chromium
 
   # ------------------------------------------------------------------
   # 2. SECURITY SCANNING (Snyk)
@@ -53,17 +57,25 @@ jobs:
     needs: [backend-check, frontend-check]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Restore Dependencies
+        run: dotnet restore backend/TicketBooking.Api/TicketBooking.Api.csproj
       - name: Snyk Backend Scan
-        uses: snyk/actions/dotnet@master
+        uses: snyk/actions/test@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          command: test
           args: --file=backend/TicketBooking.Api/TicketBooking.Api.csproj --severity-threshold=high
       - name: Snyk Frontend Scan
-        uses: snyk/actions/node@master
+        uses: snyk/actions/test@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          command: test
           args: --file=frontend/package.json --severity-threshold=high
 
   # ------------------------------------------------------------------
@@ -86,6 +98,7 @@ jobs:
         with:
           uploadArtifacts: true
           temporaryPublicStorage: true
+          static_dist_dir: frontend/dist
           # Note: In a real CI, we'd serve the 'dist' folder here for a local audit
 
   # ------------------------------------------------------------------
@@ -101,11 +114,31 @@ jobs:
       run: docker-compose build
 
   # ------------------------------------------------------------------
+  # 5. END-TO-END TESTING (Playwright)
+  # ------------------------------------------------------------------
+  e2e-check:
+    name: E2E Browser Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-check, backend-check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Install Frontend
+      run: cd frontend && npm ci
+    - name: Install Playwright
+      run: cd frontend && npx playwright install --with-deps chromium
+    - name: Run E2E Tests
+      run: cd frontend && npx playwright test
+
+  # ------------------------------------------------------------------
   # 5. DOCKER BUILD & DEPLOY TO AWS
   # ------------------------------------------------------------------
   deploy:
     name: Build & Deploy to ECS
-    needs: [snyk-scan, lighthouse-audit, docker-verify]
+    needs: [snyk-scan, lighthouse-audit, docker-verify, e2e-check]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
