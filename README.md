@@ -48,13 +48,13 @@ Explore the detailed technical documentation for each layer of CineSynk:
 
 | Category | Documentation Link |
 | :--- | :--- |
-| **Backend** | [Clean Architecture & Services](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/backendDocs.md) |
-| **Frontend** | [State Management & UI Library](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/frontendDocs.md) |
-| **Quality Gates** | [5-Tiered Testing Strategy](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/testDocs.md) |
-| **DevOps** | [CI/CD & Pipeline Workflow](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/devopsDocs.md) |
-| **Cloud Infra** | [Terraform & AWS Deployment](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/infraDocs.md) |
-| **Workflows** | [Step-by-Step Command Guide](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/workflowDocs.md) |
-| **Architecture** | [Visual Flow & Data Diagrams](file:///c:/Users/sahug/OneDrive/Desktop/ganeshdocs/antigravity/ticketbookingapp/document/architectureDocs.md) |
+| **Backend** | [Clean Architecture & Services](./document/backendDocs.md) |
+| **Frontend** | [State Management & UI Library](./document/frontendDocs.md) |
+| **Quality Gates** | [5-Tiered Testing Strategy](./document/testDocs.md) |
+| **DevOps** | [CI/CD & Pipeline Workflow](./document/devopsDocs.md) |
+| **Cloud Infra** | [Terraform & AWS Deployment](./document/infraDocs.md) |
+| **Workflows** | [Step-by-Step Command Guide](./document/workflowDocs.md) |
+| **Architecture** | [Visual Flow & Data Diagrams](./document/architectureDocs.md) |
 
 ---
 
