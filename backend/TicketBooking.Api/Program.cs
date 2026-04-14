@@ -9,58 +9,45 @@ using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddOpenApi();
+// --- 1. CORE SERVICES ---
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Configure MariaDB DbContext
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"DEBUG: Connection String found: {(!string.IsNullOrEmpty(connectionString))}");
-var serverVersion = new MySqlServerVersion(new Version(10, 4, 32)); // Common MariaDB version for XAMPP
-builder.Services.AddDbContext<TicketBookingDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion));
-
-// Configure Health Checks
 builder.Services.AddHealthChecks();
+builder.Services.AddMemoryCache();
 
-// Register Custom Services
+// --- 2. DATABASE CONFIG ---
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "server=localhost;port=3306;user=root;password=;database=bookingapplication";
+
+var mariaDbVersion = new MySqlServerVersion(new Version(10, 4, 32));
+builder.Services.AddDbContext<TicketBookingDbContext>(options =>
+    options.UseMySql(connectionString, mariaDbVersion));
+
+// --- 3. BUSINESS SERVICES ---
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IShowService, ShowService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-
-// Register Background Services
 builder.Services.AddHostedService<BookingCleanupService>();
 
-// Enable In-Memory Caching (for Idempotency)
-builder.Services.AddMemoryCache();
+// --- 4. JWT SECURITY ---
+var jwtKey = builder.Configuration["JwtSettings:Key"] ?? "super_secret_key_that_is_long_enough_for_sha256";
+var key = System.Text.Encoding.ASCII.GetBytes(jwtKey);
 
-// Configure JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = System.Text.Encoding.ASCII.GetBytes(jwtSettings["Key"] ?? "super_secret_key_that_is_long_enough_for_sha256");
-
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(x =>
-{
-    x.RequireHttpsMetadata = false;
-    x.SaveToken = true;
-    x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
-        ValidateLifetime = true
-    };
-});
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true
+        };
+    });
 
-// Configure Rate Limiting (Token Bucket)
+// --- 5. RATE LIMITING ---
 builder.Services.AddRateLimiter(options => {
     options.AddTokenBucketLimiter("fixed", limiterOptions => {
         limiterOptions.TokenLimit = 100;
@@ -71,59 +58,42 @@ builder.Services.AddRateLimiter(options => {
     });
 });
 
-// Add Controllers
-builder.Services.AddControllers();
-
 var app = builder.Build();
 
-// AUTOMATIC MIGRATIONS: Ensures the DB schema is created on startup (Critical for AWS RDS)
+// --- 6. AUTOMATIC MIGRATIONS ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<TicketBookingDbContext>();
-        context.Database.Migrate();
+        var db = services.GetRequiredService<TicketBookingDbContext>();
+        db.Database.Migrate();
         Console.WriteLine("Database migration applied successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred while migrating the database: {ex.Message}");
+        Console.WriteLine($"Migration Warning: {ex.Message}");
     }
 }
 
-// Configure the HTTP request pipeline.
+// --- 7. PIPELINE ---
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Prometheus Instrumentation
 app.UseHttpMetrics();
-
-// Global Exception Handler
 app.UseMiddleware<GlobalExceptionMiddleware>();
-
-// Idempotency Handler
 app.UseMiddleware<IdempotencyMiddleware>();
-
 app.UseHttpsRedirection();
-
-// Add Rate Limiting & Auth
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Health Check Endpoint
 app.MapHealthChecks("/health");
-
-// Prometheus metrics endpoint
 app.MapMetrics();
-
-app.MapControllers(); // Map Controller routes
-
+app.MapControllers();
 app.MapGet("/", () => "Ticket Booking API is running!");
 
 app.Run();

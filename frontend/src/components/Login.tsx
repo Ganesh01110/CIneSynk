@@ -40,17 +40,17 @@ const Login: React.FC = () => {
         </div>
         <h2>{isRegistering ? 'Create Account' : 'Welcome Back'}</h2>
         <p className="subtitle">
-          {isRegistering 
-            ? 'Join PulseQueue for seamless bookings' 
+          {isRegistering
+            ? 'Join CineSynk for seamless bookings'
             : 'Login to manage your tickets'}
         </p>
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Phone Number</label>
-            <input 
-              type="text" 
-              placeholder="e.g. 1234567890" 
+            <input
+              type="text"
+              placeholder="e.g. 1234567890"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               required
@@ -58,12 +58,12 @@ const Login: React.FC = () => {
           </div>
           <div className="input-group">
             <label>Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
+            <input
+              type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required 
+              required
             />
           </div>
 
@@ -75,9 +75,9 @@ const Login: React.FC = () => {
         </form>
 
         <div className="toggle-mode">
-          {isRegistering ? 'Already have an account?' : 'New to PulseQueue?'}
-          <button 
-            type="button" 
+          {isRegistering ? 'Already have an account?' : 'New to CineSynk?'}
+          <button
+            type="button"
             onClick={() => setIsRegistering(!isRegistering)}
             className="text-btn"
           >

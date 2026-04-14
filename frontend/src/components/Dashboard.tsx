@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <nav className="navbar">
-        <div className="logo">PulseQueue</div>
+        <div className="logo">CineSynk</div>
         <div className="user-menu">
           <span className="welcome">Hi, {user}</span>
           <button onClick={handleLogout} className="logout-btn">
@@ -34,9 +34,9 @@ const Dashboard: React.FC = () => {
       {selectedShow ? (
         <div className="booking-session">
           <div className="header-actions">
-             <button onClick={() => setSelectedShow(null)} className="back-btn">
-               Back to Shows
-             </button>
+            <button onClick={() => setSelectedShow(null)} className="back-btn">
+              Back to Shows
+            </button>
           </div>
           <SeatMap show={selectedShow} />
         </div>
@@ -49,14 +49,14 @@ const Dashboard: React.FC = () => {
                 <div className="card-media">
                   {/* In a real app, show.posterUrl would be here */}
                   <div className="poster-placeholder">
-                     <span>{show.title[0]}</span>
+                    <span>{show.title[0]}</span>
                   </div>
                 </div>
                 <div className="card-content">
                   <h3>{show.title}</h3>
                   <div className="show-meta">
                     <span className="meta-item">
-                      <Calendar size={14} /> 
+                      <Calendar size={14} />
                       {new Date(show.startTime).toLocaleDateString()}
                     </span>
                     <span className="meta-item">
@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
                       {new Date(show.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <button 
+                  <button
                     className="book-now-btn"
                     onClick={() => setSelectedShow(show)}
                   >

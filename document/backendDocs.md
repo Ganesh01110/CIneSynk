@@ -18,7 +18,7 @@ The backend is built as a RESTful Web API using **ASP.NET Core (targeted at .NET
 ## 🔐 Identity & Security
 
 ### Authentication
-PulseQueue uses state-less **JWT Authentication**. 
+CineSynk uses state-less **JWT Authentication**. 
 - **Registration:** Users provide name, phone, age, gender, and password. Passwords are never stored in plain text; they are hashed using **BCrypt** (a modern, salted hashing algorithm).
 - **Login:** On successful login, the server issues a JWT signed with a 256-bit secret key.
 - **Claims:** The token contains the user's ID, Name, Role, and Phone Number, allowing the frontend to personalize the experience without extra API calls.
